@@ -2,6 +2,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import ArticleGenerator from "@/components/ArticleGenerator";
 import Image from "next/image";
 
 export default function Dashboard() {
@@ -139,6 +140,7 @@ export default function Dashboard() {
             </pre>
           </div>
         </div>
+        <ArticleGenerator />
       </main>
     </div>
   );
