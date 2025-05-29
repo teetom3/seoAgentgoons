@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Loader2, Sparkles, FileText } from "lucide-react";
 
 interface Article {
   id: number;
@@ -7,19 +8,15 @@ interface Article {
   createdAt: string;
 }
 
-export default function ArticleGenerator() {
+interface Props {
+  onArticle: (article: Article) => void;
+}
+
+export default function ArticleGenerator({ onArticle }: Props) {
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
-  const [article, setArticle] = useState<Article | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<Article[]>([]);
-
-  // Charger l'historique à l'ouverture
-  useEffect(() => {
-    fetch("/api/articles/articles")
-      .then((res) => res.json())
-      .then((data) => setHistory(data.articles || []));
-  }, []);
+  const [article, setArticle] = useState<Article | null>(null);
 
   const handleGenerate = async () => {
     setError(null);
@@ -34,7 +31,7 @@ export default function ArticleGenerator() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur inconnue");
       setArticle(data.article);
-      setHistory((prev) => [data.article, ...prev]);
+      onArticle(data.article);
       setTitle("");
     } catch (err: any) {
       setError(err.message);
@@ -43,53 +40,47 @@ export default function ArticleGenerator() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl mx-auto pt-12">
-      {/* Centre : Générateur */}
-      <div className="flex-1 bg-white rounded-2xl p-8 shadow-lg border">
-        <h2 className="text-2xl font-bold mb-4">Générer un article SEO</h2>
+    <section className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-3xl shadow-2xl p-8 mx-auto w-full max-w-2xl">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-lg">
+          <FileText className="w-6 h-6 text-white" />
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">Générer un article SEO</h2>
+      </div>
+
+      <div className="flex flex-col gap-4">
         <input
           type="text"
-          className="border px-4 py-2 rounded-lg w-full mb-4"
-          placeholder="Titre de l'article (ex: Meilleur CRM pour TPE)"
+          className="border-2 border-amber-100 focus:border-amber-400 px-4 py-3 rounded-xl text-lg transition outline-none"
+          placeholder="Exemple : Meilleur CRM pour TPE"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={loading}
         />
+
         <button
-          className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-8 py-3 rounded-lg font-semibold disabled:opacity-50"
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-lg font-semibold px-8 py-3 rounded-xl shadow-xl transition-all disabled:opacity-60"
           disabled={loading || !title.trim()}
           onClick={handleGenerate}
         >
-          {loading ? "Génération..." : "Générer"}
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" /> Génération...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" /> Générer l’article
+            </>
+          )}
         </button>
-        {error && <p className="text-red-500 mt-4">{error}</p>}
-        {article && (
-          <div className="mt-8">
-            <h3 className="font-bold text-xl mb-2">{article.title}</h3>
-            <pre className="whitespace-pre-wrap bg-gray-50 border rounded-lg p-4 text-sm">
-              {article.content}
-            </pre>
-          </div>
-        )}
       </div>
-
-      {/* Droite : Historique */}
-      <div className="w-full md:w-96 bg-gray-50 rounded-2xl p-6 shadow-md border h-fit">
-        <h3 className="font-semibold text-lg mb-4">Historique</h3>
-        {history.length === 0 && (
-          <p className="text-gray-400">Aucun article généré pour l’instant.</p>
-        )}
-        <ul className="space-y-4 max-h-[600px] overflow-y-auto">
-          {history.map((art) => (
-            <li key={art.id} className="p-2 border rounded-lg bg-white shadow">
-              <div className="text-sm font-bold">{art.title}</div>
-              <div className="text-xs text-gray-400">
-                {new Date(art.createdAt).toLocaleString("fr-FR")}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {article && (
+        <div className="mt-8 bg-gray-50 rounded-xl p-6 border">
+          <h3 className="font-bold text-xl mb-2">{article.title}</h3>
+          <pre className="whitespace-pre-wrap text-sm">{article.content}</pre>
+        </div>
+      )}
+    </section>
   );
 }
