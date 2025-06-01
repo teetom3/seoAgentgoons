@@ -48,6 +48,7 @@ export const authOptions: AuthOptions = {
       // Ajouter l'ID utilisateur à la session
       if (session.user && user) {
         (session.user as any).id = user.id;
+        (session.user as any).image = user.image;
       }
       return session;
     },
