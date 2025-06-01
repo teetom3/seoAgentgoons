@@ -1,6 +1,8 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { LogOut } from "lucide-react";
+import DashboardNavbar from "./components/DashboardNavbar";
+import Footer from "@/components/Footer";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -20,6 +22,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50/30 to-white">
+      <DashboardNavbar/>
       <div className="container mx-auto px-4 py-12 max-w-lg">
         <div className="bg-white/90 backdrop-blur rounded-2xl shadow-2xl p-8 border border-gray-200/50">
           <div className="flex items-center gap-4 mb-8">
@@ -63,6 +66,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }
