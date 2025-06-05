@@ -5,7 +5,8 @@ import ArticleGenerator from "@/components/ArticleGenerator";
 import { Archive, Clock, Coins, Crown, LogOut, X, Copy } from "lucide-react";
 import Footer from "@/components/Footer";
 import DashboardNavbar from "./components/DashboardNavbar";
-
+import { useToken } from "../context/TokenContext";
+import toast from "react-hot-toast";
 interface Article {
   id: number;
   title: string;
@@ -18,7 +19,14 @@ export default function Dashboard() {
   const router = useRouter();
   const [history, setHistory] = useState<Article[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-
+  const { refreshTokens } = useToken();
+  useEffect(() => {
+    if (router.query.success) {
+      toast.success("✅ Paiement réussi ! Vos tokens ont été crédités.");
+      refreshTokens();
+      // Nettoyer l'URL après affichage du toast
+    }
+  }, [router]);
   // Fetch history au chargement
   useEffect(() => {
     fetch("/api/articles/articles")
@@ -42,6 +50,7 @@ export default function Dashboard() {
 
   const handleAddArticle = (article: Article) => {
     setHistory((prev) => [article, ...prev]);
+    refreshTokens();
   };
 
   const copyToClipboard = (content: string) => {
@@ -51,7 +60,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50/30 to-white">
       {/* Navbar */}
-<DashboardNavbar/>
+      <DashboardNavbar />
 
       <main className="container mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Centre : bloc marketing + générateur */}
@@ -99,7 +108,7 @@ export default function Dashboard() {
                   className="flex flex-col items-start w-full bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm hover:bg-amber-50 transition text-left"
                   onClick={() => setSelectedArticle(art)}
                 >
-                  <div className="font-medium text-gray-900 truncate">
+                  <div className="font-medium text-gray-900 truncate w-full overflow-hidden">
                     {art.title}
                   </div>
                   <div className="text-xs text-gray-500 mt-1">

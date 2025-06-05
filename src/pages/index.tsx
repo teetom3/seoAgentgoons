@@ -8,6 +8,8 @@ import ArticleGenerator from "@/components/ArticleGenerator";
 import ProcessSection from "@/components/ProcessSection";
 import PricingSection from "@/components/PricingSection";
 import Footer from "@/components/Footer";
+import HowItWorks from "@/components/HowItsWorks";
+import WhySeoMattersPage from "@/components/WhySeoMatters";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,10 +25,13 @@ export default function Home() {
     <Theme>
       <div className="min-h-screen">
         <Header />
-        <HeroSection />
-        <ProcessSection />
-
-        <PricingSection />
+        <main>
+          <HeroSection />
+          <HowItWorks />
+          <ProcessSection />
+          <WhySeoMattersPage />
+          <PricingSection />
+        </main>
         <Footer />
       </div>
     </Theme>

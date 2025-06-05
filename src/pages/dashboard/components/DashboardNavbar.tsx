@@ -1,6 +1,6 @@
 import { useSession, signOut } from "next-auth/react";
 import { Coins, Archive, Crown, LogOut } from "lucide-react";
-
+import TokenCounter from "./TokenCounter";
 export default function DashboardNavbar() {
   const { data: session } = useSession();
 
@@ -16,21 +16,24 @@ export default function DashboardNavbar() {
             <span className="font-medium bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
               BlogCraft AI
             </span>
-            <span className="hidden md:inline ml-2 text-gray-400 font-light">
-              Dashboard
-            </span>
+            <a href="/dashboard">
+              <span className="hidden md:inline ml-2 text-gray-400 font-light">
+                Dashboard
+              </span>
+            </a>
           </span>
         </div>
         {/* Links */}
         <div className="flex items-center gap-4">
+          <TokenCounter />
           <a
-            href="#"
+            href="/dashboard/shop"
             className="flex items-center gap-2 text-gray-700 hover:text-amber-600 transition text-sm font-medium px-3 py-2 rounded-xl"
           >
-            <Coins className="w-4 h-4" /> Historique tokens
+            <Coins className="w-4 h-4" /> Boutique de Token
           </a>
           <a
-            href="#"
+            href="/dashboard/archive"
             className="flex items-center gap-2 text-gray-700 hover:text-amber-600 transition text-sm font-medium px-3 py-2 rounded-xl"
           >
             <Archive className="w-4 h-4" /> Articles archivés

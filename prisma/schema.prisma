@@ -44,6 +44,11 @@ model User {
   accounts      Account[]
   sessions      Session[]
   articles      Article[] //
+
+
+   tokenPurchases TokenPurchase[] // Relation inverse
+
+  
 }
 
 model Article {
@@ -61,4 +66,17 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Optionnel : Historique des achats
+model TokenPurchase {
+  id              String   @id @default(cuid())
+  userId          Int
+  tokens          Int
+  amount          Float
+  stripeSessionId String   @unique
+  packName        String
+  createdAt       DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

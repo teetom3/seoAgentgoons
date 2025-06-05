@@ -1,6 +1,16 @@
 // pages/boutique.tsx
 import { Coins, Diamond, Star } from "lucide-react";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import toast from "react-hot-toast";
+import { useState } from "react";
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
+import DashboardNavbar from "./components/DashboardNavbar";
+import Footer from "@/components/Footer";
 
 const plans = [
   {
@@ -30,8 +40,39 @@ const plans = [
 ];
 
 export default function Shop() {
+  const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+
+  const handlePurchase = async (packIndex: number) => {
+    setLoadingIndex(packIndex);
+
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ packIndex }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Erreur lors de la création de la session:", data.error);
+        alert("Erreur lors de la création de la session de paiement");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      alert("Une erreur est survenue lors de la création du paiement");
+    } finally {
+      setLoadingIndex(null);
+    }
+  };
+
   return (
     <>
+      <DashboardNavbar />
       <Head>
         <title>Boutique – Acheter des tokens | BlogCraft AI</title>
       </Head>
@@ -49,6 +90,8 @@ export default function Shop() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
             {plans.map((plan, idx) => {
               const Icon = plan.icon;
+              const isLoading = loadingIndex === idx;
+
               return (
                 <div
                   key={plan.name}
@@ -79,22 +122,51 @@ export default function Shop() {
                   <p className="text-gray-500 mb-4">{plan.name}</p>
                   <div className="mb-8">
                     <span className="text-4xl font-light text-gray-900">
-                      {plan.price} €
+                      {plan.price} €
                     </span>
                     <div className="text-xs text-gray-400">
-                      {(plan.price / plan.tokens).toFixed(2)} € / token
+                      {(plan.price / plan.tokens).toFixed(2)} € / token
                     </div>
                   </div>
                   <button
-                    className={`w-full py-3 rounded-xl font-medium text-lg transition
+                    onClick={() => handlePurchase(idx)}
+                    disabled={isLoading}
+                    className={`w-full py-3 rounded-xl font-medium text-lg transition relative
                       ${
                         plan.popular
                           ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-lg"
                           : "bg-gray-900 hover:bg-gray-800 text-white shadow"
                       }
+                      ${isLoading ? "opacity-70 cursor-not-allowed" : ""}
                     `}
                   >
-                    Acheter
+                    {isLoading ? (
+                      <span className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Redirection...
+                      </span>
+                    ) : (
+                      "Acheter"
+                    )}
                   </button>
                 </div>
               );
@@ -105,6 +177,7 @@ export default function Shop() {
           </p>
         </div>
       </div>
+      <Footer />
     </>
   );
 }
